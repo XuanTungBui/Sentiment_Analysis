@@ -1,24 +1,23 @@
-from pyvi import ViTokenizer
+from underthesea import word_tokenize
 import re
 import string
-import codecs
 import pandas as pd
 
-path_nag = 'sentiment_dicts/nag.txt'
-path_pos = 'sentiment_dicts/pos.txt'
+path_nag = 'sentiment_dicts/nag_dash.txt'
+path_pos = 'sentiment_dicts/pos_dash.txt'
 path_not = 'sentiment_dicts/not.txt'
 
-with codecs.open(path_nag, 'r', encoding='UTF-8') as f:
-    nag = f.readlines()
-nag_list = [n.replace('\n', '') for n in nag]
+with open(path_nag, 'r', encoding='utf8') as f:
+    nag = f.read()
+    nag_list = nag.splitlines()
 
-with codecs.open(path_pos, 'r', encoding='UTF-8') as f:
-    pos = f.readlines()
-pos_list = [n.replace('\n', '') for n in pos]
-with codecs.open(path_not, 'r', encoding='UTF-8') as f:
-    not_ = f.readlines()
-not_list = [n.replace('\n', '') for n in not_]
-
+with open(path_pos, 'r', encoding='utf8') as f:
+    pos = f.read()
+    pos_list = pos.splitlines()
+    
+with open(path_not, 'r', encoding='utf8') as f:
+    not_ = f.read()
+    not_list = not_.splitlines()
 
 def normalize(text):
     #Remove các ký tự kéo dài: vd: đẹppppppp
@@ -102,8 +101,8 @@ def text_tokenize(s):
     translator = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
     s = s.translate(translator)
 
-    texts = ViTokenizer.tokenize(s)
-    texts = s.split()
+    texts = word_tokenize(s,format="text")
+    texts = texts.split()
     return texts
 
 def add_features(arr_s):
@@ -140,6 +139,7 @@ def preprocessing(s):
     s = text_tokenize(s)
     s = add_features(s)
     return s
+    
 
 def data_agumentation(dataframe):
     frame = dataframe.copy()
