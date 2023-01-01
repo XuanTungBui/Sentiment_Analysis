@@ -84,8 +84,8 @@ def normalize(text):
         ' por ': u' tệ ',' poor ': u' tệ ', 'ib':u' nhắn tin ', 'rep':u' trả lời ',u'fback':' feedback ','fedback':' feedback ',
         #dưới 3* quy về 1*, trên 3* quy về 5*
         '6 sao': ' 5star ','6 star': ' 5star ', '5star': ' 5star ','5 sao': ' 5star ','5sao': ' 5star ',
-        'starstarstarstarstar': ' 5star ', '1 sao': ' 1star ', '1sao': ' 1star ','2 sao':' 1star ','2sao':' 1star ',
-        '2 starstar':' 1star ','1star': ' 1star ', '0 sao': ' 1star ', '0star': ' 1star ','ngàn sao':'5star','nghìn sao':'5star'}
+        'starstarstarstarstar': ' 5star ', '1 sao': ' 1star ', '1sao': ' 1star ','2 sao':' 1star ',' 2sao ':' 1star ',
+        '2 starstar':' 1star ','1star': ' 1star ', '0 sao': ' 1star ', '0star': ' 1star ',' ngàn sao ':' 5star ',' nghìn sao ':' 5star '}
 
     for k, v in replace_list.items():
         text = text.replace(k, v)
@@ -139,24 +139,3 @@ def preprocessing(s):
     s = text_tokenize(s)
     s = add_features(s)
     return s
-    
-
-def data_agumentation(dataframe):
-    frame = dataframe.copy()
-    
-    def remove_accents(text):
-        s1 = u'ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝàáâãèéêìíòóôõùúýĂăĐđĨĩŨũƠơƯưẠạẢảẤấẦầẨẩẪẫẬậẮắẰằẲẳẴẵẶặẸẹẺẻẼẽẾếỀềỂểỄễỆệỈỉỊịỌọỎỏỐốỒồỔổỖỗỘộỚớỜờỞởỠỡỢợỤụỦủỨứỪừỬửỮữỰựỲỳỴỵỶỷỸỹ'
-        s0 = u'AAAAEEEIIOOOOUUYaaaaeeeiioooouuyAaDdIiUuOoUuAaAaAaAaAaAaAaAaAaAaAaAaEeEeEeEeEeEeEeEeIiIiOoOoOoOoOoOoOoOoOoOoOoOoUuUuUuUuUuUuUuYyYyYyYy'
-        s = ''
-        for c in text:
-            if c in s1:
-                s += s0[s1.index(c)]
-            else:
-                s += c
-        return s
-    
-    frame['comment'] = frame['comment'].map(remove_accents)
-    
-    dfs = [dataframe,frame]
-    final_df = pd.concat(dfs, ignore_index=True)
-    return final_df
