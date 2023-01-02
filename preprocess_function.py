@@ -99,7 +99,7 @@ def remove_digits(s):
     return res
 
 def text_tokenize(s):
-    translator = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
+    translator = str.maketrans('','',string.punctuation)
     s = s.translate(translator)
 
     texts = word_tokenize(s,format="text")
