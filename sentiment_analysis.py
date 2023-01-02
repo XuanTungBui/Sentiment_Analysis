@@ -10,15 +10,15 @@ import matplotlib.pyplot as plt
 import pickle
 
 
-df = pd.read_csv('dataset.csv')
+df = pd.read_csv('dataset1.csv')
 # df['comment'] = df['comment'].map(preprocessing)
 
 X_train, X_test, y_train, y_test = train_test_split(df.comment, df.label, test_size=0.2, random_state=42)
 
 
 steps = []
-steps.append(('tfidf', TfidfVectorizer(ngram_range=(1,2),use_idf=True, sublinear_tf = True, norm='l2', smooth_idf=True)))
-steps.append(('model',LinearSVC(fit_intercept = True, multi_class='crammer_singer', C=0.2175)))
+steps.append(('tfidf', TfidfVectorizer(ngram_range=(1,2), sublinear_tf = True)))
+steps.append(('model',LinearSVC(multi_class='crammer_singer', C=0.25)))
 
 clf = Pipeline(steps)
 clf.fit(X_train, y_train)
