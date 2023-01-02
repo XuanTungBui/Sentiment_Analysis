@@ -6,6 +6,7 @@ import pandas as pd
 path_nag = 'sentiment_dicts/nag_dash.txt'
 path_pos = 'sentiment_dicts/pos_dash.txt'
 path_not = 'sentiment_dicts/not.txt'
+path_stop = 'vietnamese-stopwords-dash.txt'
 
 with open(path_nag, 'r', encoding='utf8') as f:
     nag = f.read()
@@ -15,9 +16,9 @@ with open(path_pos, 'r', encoding='utf8') as f:
     pos = f.read()
     pos_list = pos.splitlines()
     
-with open(path_not, 'r', encoding='utf8') as f:
-    not_ = f.read()
-    not_list = not_.splitlines()
+with open(path_stop, 'r', encoding='utf8') as f:
+    stop = f.read()
+    stop_list = stop.splitlines()
 
 def normalize(text):
     #Remove các ký tự kéo dài: vd: đẹppppppp
@@ -84,8 +85,8 @@ def normalize(text):
         ' por ': u' tệ ',' poor ': u' tệ ', 'ib':u' nhắn tin ', 'rep':u' trả lời ',u'fback':' feedback ','fedback':' feedback ',
         #dưới 3* quy về 1*, trên 3* quy về 5*
         '6 sao': ' 5star ','6 star': ' 5star ', '5star': ' 5star ','5 sao': ' 5star ','5sao': ' 5star ',
-        'starstarstarstarstar': ' 5star ', '1 sao': ' 1star ', '1sao': ' 1star ','2 sao':' 1star ','2sao':' 1star ',
-        '2 starstar':' 1star ','1star': ' 1star ', '0 sao': ' 1star ', '0star': ' 1star ','ngàn sao':'5star','nghìn sao':'5star'}
+        'starstarstarstarstar': ' 5star ', '1 sao': ' 1star ', '1sao': ' 1star ','2 sao':' 1star ',' 2sao ':' 1star ',
+        '2 starstar':' 1star ','1star': ' 1star ', '0 sao': ' 1star ', '0star': ' 1star ',' ngàn sao ':' 5star ',' nghìn sao ':' 5star '}
 
     for k, v in replace_list.items():
         text = text.replace(k, v)
@@ -98,34 +99,26 @@ def remove_digits(s):
     return res
 
 def text_tokenize(s):
-    translator = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
+    translator = str.maketrans('','',string.punctuation)
     s = s.translate(translator)
 
     texts = word_tokenize(s,format="text")
     texts = texts.split()
     return texts
 
+def remove_stopword(s):
+    text = [w for w in s if not w in stop_list]
+    return text
+
 def add_features(arr_s):
     len_text = len(arr_s)
     
     for i in range(len_text):
         cp_text = arr_s[i]
-        if cp_text in not_list: # Xử lý vấn đề phủ định (VD: áo này chẳng đẹp--> áo này notpos)
-            numb_word = 2 if len_text - i - 1 >= 4 else len_text - i - 1
-
-            for j in range(numb_word):
-                if arr_s[i + j + 1] in pos_list:
-                    arr_s[i] = 'notpos'
-                    arr_s[i + j + 1] = ''
-
-                if arr_s[i + j + 1] in nag_list:
-                    arr_s[i] = 'notnag'
-                    arr_s[i + j + 1] = ''
-        else: #Thêm feature cho những sentiment words (áo này đẹp--> áo này đẹp positive)
-            if cp_text in pos_list:
-                arr_s.append('positive')
-            elif cp_text in nag_list:
-                arr_s.append('nagative')
+        if cp_text in pos_list:
+            arr_s.append('positive')
+        elif cp_text in nag_list:
+            arr_s.append('nagative')
 
     text = u' '.join(arr_s)
     text = text.replace(u'"', u' ')
@@ -137,26 +130,6 @@ def preprocessing(s):
     s = normalize(s)
     s = remove_digits(s)
     s = text_tokenize(s)
+    #s = remove_stopword(s)
     s = add_features(s)
     return s
-    
-
-def data_agumentation(dataframe):
-    frame = dataframe.copy()
-    
-    def remove_accents(text):
-        s1 = u'ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝàáâãèéêìíòóôõùúýĂăĐđĨĩŨũƠơƯưẠạẢảẤấẦầẨẩẪẫẬậẮắẰằẲẳẴẵẶặẸẹẺẻẼẽẾếỀềỂểỄễỆệỈỉỊịỌọỎỏỐốỒồỔổỖỗỘộỚớỜờỞởỠỡỢợỤụỦủỨứỪừỬửỮữỰựỲỳỴỵỶỷỸỹ'
-        s0 = u'AAAAEEEIIOOOOUUYaaaaeeeiioooouuyAaDdIiUuOoUuAaAaAaAaAaAaAaAaAaAaAaAaEeEeEeEeEeEeEeEeIiIiOoOoOoOoOoOoOoOoOoOoOoOoUuUuUuUuUuUuUuYyYyYyYy'
-        s = ''
-        for c in text:
-            if c in s1:
-                s += s0[s1.index(c)]
-            else:
-                s += c
-        return s
-    
-    frame['comment'] = frame['comment'].map(remove_accents)
-    
-    dfs = [dataframe,frame]
-    final_df = pd.concat(dfs, ignore_index=True)
-    return final_df
